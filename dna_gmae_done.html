@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeneCraft Jr. 基因巧手實驗室 - DNA 編輯與全球危機救援工作室</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bio: {
+                            bg: '#F4F9F9',
+                            card: '#FFFFFF',
+                            primary: '#0D9488', // 蒂芬妮綠/藍綠
+                            secondary: '#0284C7', // 海洋藍
+                            accent: '#E11D48', // 珊瑚紅 / 插入基因
+                            scissors: '#F59E0B', // 琥珀黃剪刀
+                            target: '#15803D', // 綠色 Target
+                        }
+                    },
+                    fontFamily: {
+                        heading: ['Fredoka', 'sans-serif'],
+                        body: ['Nunito', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F0F7F7;
+            background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* 動畫效果 */
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(225, 29, 72, 0.4)); }
+            50% { filter: drop-shadow(0 0 16px rgba(225, 29, 72, 0.9)); }
+        }
+
+        .animate-pulse-glow {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+
+        @keyframes foldMorph {
+            0% { transform: scale(0.92) rotate(0deg); }
+            50% { transform: scale(1.06) rotate(4deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .animate-fold {
+            animation: foldMorph 2s ease-in-out infinite alternate;
+        }
+
+        /* 自訂捲軸 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0d9488;
+            border-radius: 4px;
+        }
+
+        /* 互動 SVG 懸停效果 */
+        .dna-target-group:hover {
+            cursor: pointer;
+            filter: drop-shadow(0 0 14px rgba(34, 197, 94, 0.95));
+        }
+
+        .dna-target-group:hover .target-highlight {
+            fill-opacity: 0.35;
+            stroke-width: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <!-- 頂部導航欄 (Header Navigation) -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-teal-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <!-- 標誌與標題 -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-teal-600/30">
+                    <i class="fa-solid fa-earth-americas"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading text-xl md:text-2xl font-bold text-teal-800 leading-none" id="ui-title">GeneCraft Jr.</h1>
+                    <p class="text-xs text-slate-500 font-semibold" id="ui-subtitle">DNA 編輯探索 • 解決全球重大危機</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- 語言切換開關 (Language Switcher) -->
+                <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl border border-teal-300 bg-teal-50 text-teal-800 text-xs font-bold hover:bg-teal-100 transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-globe text-teal-600"></i>
+                    <span id="lang-btn-text">English</span>
+                </button>
+
+                <!-- 分頁導航 -->
+                <nav class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                    <button id="nav-learn" onclick="switchTab('learn')" class="px-4 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-white text-teal-700 shadow-sm">
+                        <i class="fa-solid fa-book-open mr-1.5"></i><span id="nav-learn-text">為什麼需要 DNA 編輯？</span>
+                    </button>
+                    <button id="nav-game" onclick="switchTab('game')" class="px-4 py-1.5 rounded-xl text-xs md:text-sm font-bold text-slate-600 hover:text-teal-700 transition-all duration-200">
+                        <i class="fa-solid fa-shield-virus mr-1.5"></i><span id="nav-game-text">全球危機救援戰</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 (Main Content Container) -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 flex flex-col">
+
+        <!-- ================= 第一區塊：為什麼需要 DNA 編輯？ (SECTION 1: WHY DO WE NEED DNA EDITING?) ================= -->
+        <section id="section-learn" class="space-y-6">
+            
+            <!-- 主視覺橫幅 -->
+            <div class="bg-gradient-to-r from-teal-600 via-teal-700 to-emerald-700 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-15 text-white pointer-events-none">
+                    <i class="fa-solid fa-dna text-[240px]"></i>
+                </div>
+                <div class="max-w-2xl relative z-10 space-y-3">
+                    <span class="bg-teal-500/40 text-teal-100 text-xs font-extrabold uppercase px-3 py-1 rounded-full border border-teal-300/30 tracking-wider" id="hero-badge">分子生物學核心概念</span>
+                    <h2 class="font-heading text-3xl md:text-4xl font-extrabold" id="hero-title">為什麼我們需要 DNA 編輯？</h2>
+                    <p class="text-teal-100 text-base md:text-lg leading-relaxed" id="hero-desc">
+                        因為「**DNA 密碼 $\rightarrow$ 蛋白質 3D 形狀 (Shape) $\rightarrow$ 生物功能 (Function)**」！全球面臨的廢電池資源回收、塑膠污染、氣候乾旱、病毒傳播與碳排放等危機，都需要特定「3D 幾何形狀」的蛋白質來解決。透過 DNA 編輯，我們能為細胞寫入正確藍圖，摺疊出解決問題的蛋白質鑰匙！
+                    </p>
+                    <div class="pt-2">
+                        <button onclick="switchTab('game')" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-heading font-bold px-6 py-3 rounded-2xl transition shadow-lg hover:shadow-amber-400/30 flex items-center gap-2">
+                            <i class="fa-solid fa-play"></i> <span id="hero-btn">進入全球危機救援遊戲</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 生命的核心法則：DNA 序列 ➔ 3D 形狀 ➔ 生物功能 (Interactive Lock & Key Principle) -->
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-200/80 space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h3 class="font-heading text-2xl font-bold text-slate-800" id="principle-title">🔑 生命的黃金法則：DNA ➔ 蛋白質形狀 ➔ 生物功能</h3>
+                    <p class="text-sm text-slate-500 mt-1" id="principle-subtitle">蛋白質就像一把鑰匙，必須摺疊出正確的「3D 幾何形狀」，才能完美鎖定並解決特定的全球危機！</p>
+                </div>
+
+                <!-- 鎖匙配對視覺展示卡片 (3-Stage visual card) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <!-- 階段 1: DNA 密碼 -->
+                    <div class="bg-teal-50/70 border border-teal-200 p-5 rounded-2xl space-y-2 relative">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-lg shadow">1</div>
+                        <h4 class="font-heading font-bold text-teal-900 text-lg" id="flow-step1-title">1. DNA 藍圖編碼</h4>
+                        <p class="text-xs text-teal-800" id="flow-step1-desc">DNA 上排列著 A、T、C、G 鹼基序列，記載著蛋白質的組成密碼。</p>
+                        <div class="text-2xl pt-2">🧬</div>
+                    </div>
+
+                    <!-- 階段 2: 3D 摺疊成型 -->
+                    <div class="bg-amber-50/70 border border-amber-200 p-5 rounded-2xl space-y-2 relative">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-lg shadow">2</div>
+                        <h4 class="font-heading font-bold text-amber-900 text-lg" id="flow-step2-title">2. 蛋白質 3D 摺疊</h4>
+                        <p class="text-xs text-amber-800" id="flow-step2-desc">氨基酸鏈扭轉扭結，摺疊成獨一無二的「3D 幾何形狀」（如金屬螯合口袋、剪刀形、網狀形）。</p>
+                        <div class="text-2xl pt-2 animate-fold">🧩</div>
+                    </div>
+
+                    <!-- 階段 3: 精準執行功能 -->
+                    <div class="bg-rose-50/70 border border-rose-200 p-5 rounded-2xl space-y-2 relative">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-lg shadow">3</div>
+                        <h4 class="font-heading font-bold text-rose-900 text-lg" id="flow-step3-title">3. 鎖匙配對解決危機</h4>
+                        <p class="text-xs text-rose-800" id="flow-step3-desc">特定形狀的蛋白質精準鎖定目標（如螯合回收 Li₂CO₃/CoSO₄/NiSO₄、分解塑膠、捕獲 CO₂）！</p>
+                        <div class="text-2xl pt-2">🔑</div>
+                    </div>
+                </div>
+
+                 <!-- 修正後的正統 DNA 解開泡泡圖解 (Corrected Biological DNA Diagram) -->
+                <div class="pt-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-4">
+                        <h4 class="font-heading text-xl font-bold text-slate-800" id="anatomy-title">DNA 編輯的標準結構圖解</h4>
+                        <div class="flex flex-wrap gap-2" id="component-badges">
+                            <button onclick="highlightComponent('target')" class="comp-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block mr-1"></span> <span data-i18n="badge-target">目標基因位置</span>
+                            </button>
+                            <button onclick="highlightComponent('scissors')" class="comp-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block mr-1"></span> <span data-i18n="badge-scissors">DNA 分子剪刀</span>
+                            </button>
+                            <button onclick="highlightComponent('desired')" class="comp-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block mr-1"></span> <span data-i18n="badge-desired">優良機能 DNA</span>
+                            </button>
+                            <button onclick="highlightComponent('protein')" class="comp-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300 hover:bg-sky-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-sky-600 inline-block mr-1"></span> <span data-i18n="badge-protein">特化形狀蛋白質</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SVG 正確生物 DNA 結構示意圖 -->
+                    <div class="relative bg-slate-50 rounded-2xl p-4 md:p-8 border border-slate-200 overflow-x-auto flex justify-center items-center min-h-[320px]">
+                        <svg id="diagram-svg" viewBox="0 0 850 320" class="w-full max-w-4xl h-auto">
+                            <defs>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#15803D"/>
+                                </marker>
+                            </defs>
+
+                            <!-- 1. 左側雙螺旋扭轉 (Left Twisting Helix) -->
+                            <!-- 上骨架 -->
+                            <path d="M 30 130 C 70 70, 110 70, 150 130 C 190 190, 220 190, 260 90 L 600 90" fill="none" stroke="#38BDF8" stroke-width="6" stroke-linecap="round"/>
+                            <!-- 下骨架 -->
+                            <path d="M 30 130 C 70 190, 110 190, 150 130 C 190 70, 220 70, 260 170 L 600 170" fill="none" stroke="#0284C7" stroke-width="6" stroke-linecap="round"/>
+
+                            <!-- 左側雙螺旋橫槓 -->
+                            <g stroke="#7DD3FC" stroke-width="4">
+                                <line x1="50" y1="105" x2="50" y2="155"/>
+                                <line x1="80" y1="85" x2="80" y2="170"/>
+                                <line x1="110" y1="90" x2="110" y2="170"/>
+                                <line x1="140" y1="120" x2="140" y2="140"/>
+                                <line x1="170" y1="157" x2="170" y2="110"/>
+                                <line x1="200" y1="170" x2="200" y2="90"/>
+                                <line x1="230" y1="150" x2="230" y2="110"/>
+                            </g>
+
+                            <!-- 2. 中間解開泡泡區域 (Unwound DNA Bubble: X=260 to 600) -->
+                            <!-- 目標基因序列 (綠色) -->
+                            <g id="svg-target" class="transition-all duration-300 cursor-pointer" onclick="highlightComponent('target')">
+                                <!-- 頂部與底部基因卡夾 -->
+                                <rect x="300" y="78" width="260" height="24" rx="6" fill="#DCFCE7" stroke="#22C55E" stroke-width="2"/>
+                                <rect x="300" y="158" width="260" height="24" rx="6" fill="#DCFCE7" stroke="#22C55E" stroke-width="2"/>
+                                
+                                <!-- 垂直鹼基對橫槓 -->
+                                <g stroke="#15803D" stroke-width="5">
+                                    <line x1="325" y1="90" x2="325" y2="170"/>
+                                    <line x1="355" y1="90" x2="355" y2="170"/>
+                                    <line x1="385" y1="90" x2="385" y2="170"/>
+                                    <line x1="415" y1="90" x2="415" y2="170"/>
+                                    <line x1="445" y1="90" x2="445" y2="170"/>
+                                    <line x1="475" y1="90" x2="475" y2="170"/>
+                                    <line x1="505" y1="90" x2="505" y2="170"/>
+                                    <line x1="535" y1="90" x2="535" y2="170"/>
+                                </g>
+
+                                <path d="M 330 35 Q 370 55 410 85" fill="none" stroke="#15803D" stroke-width="2" marker-end="url(#arrow)"/>
+                                <text x="250" y="30" font-family="Fredoka" font-size="14" font-weight="bold" fill="#15803D" id="svg-text-target">目標基因位置 (要切除的舊 DNA)</text>
+                            </g>
+
+                            <!-- 分子剪刀圖示 (黃色) -->
+                            <g id="svg-scissors" class="transition-all duration-300 cursor-pointer" onclick="highlightComponent('scissors')">
+                                <circle cx="560" cy="30" r="28" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2"/>
+                                <text x="545" y="37" font-family="FontAwesome" font-size="24" fill="#D97706">✂️</text>
+                                <text x="595" y="27" font-family="Fredoka" font-size="14" font-weight="bold" fill="#B45309" id="svg-text-scissors">DNA 分子剪刀</text>
+                                <text x="595" y="45" font-family="Nunito" font-size="11" fill="#92400E" id="svg-text-scissors-sub">(精準切斷 DNA)</text>
+                            </g>
+
+                            <!-- 3. 右側雙螺旋扭轉 (Right Twisting Helix: X=600 to 820) -->
+                            <path d="M 600 90 C 640 190, 670 190, 710 130 C 750 70, 780 70, 820 130" fill="none" stroke="#38BDF8" stroke-width="6" stroke-linecap="round"/>
+                            <path d="M 600 170 C 640 70, 670 70, 710 130 C 750 190, 780 190, 820 130" fill="none" stroke="#0284C7" stroke-width="6" stroke-linecap="round"/>
+
+                            <g stroke="#7DD3FC" stroke-width="4">
+                                <line x1="650" y1="170" x2="650" y2="95"/>
+                                <line x1="680" y1="160" x2="680" y2="95"/>
+                                <line x1="740" y1="100" x2="740" y2="165"/>
+                                <line x1="770" y1="90" x2="770" y2="170"/>
+                                <line x1="800" y1="110" x2="800" y2="150"/>
+                            </g>
+
+                            <!-- 新功能 DNA 片段 (紅色) -->
+                            <g id="svg-desired" class="transition-all duration-300 cursor-pointer" onclick="highlightComponent('desired')">
+                                <rect x="650" y="235" width="110" height="50" rx="10" fill="#FFE4E6" stroke="#E11D48" stroke-width="2"/>
+                                <g stroke="#E11D48" stroke-width="5">
+                                    <line x1="675" y1="245" x2="675" y2="275"/>
+                                    <line x1="705" y1="245" x2="705" y2="275"/>
+                                    <line x1="735" y1="245" x2="735" y2="275"/>
+                                </g>
+                                <text x="630" y="303" font-family="Fredoka" font-size="13" font-weight="bold" fill="#BE123C" id="svg-text-desired">新優良機能 DNA</text>
+                            </g>
+
+                            <!-- 特化形狀蛋白質表達結果 -->
+                             <g id="svg-protein" class="transition-all duration-300 cursor-pointer" onclick="highlightComponent('protein')">
+                                <!-- 藍色水滴/眼狀外殼 -->
+                                <path d="M 85 240 C 65 220, 50 250, 70 270 C 55 295, 90 310, 110 290 C 135 305, 155 280, 140 255 C 150 235, 120 215, 95 230 Z" 
+                                      fill="#E0F2FE" stroke="#0284C7" stroke-width="3" stroke-linejoin="round"/>
+                                <!-- 內部嵌入黃色鎖匙/鑰匙 -->
+                                <text x="92" y="270" font-size="22">🔑</text>
+
+                                <!-- 右側文本 -->
+                                <text x="165" y="252" font-family="Fredoka" font-size="14" font-weight="bold" fill="#0369A1" id="svg-text-protein">特化形狀蛋白質</text>
+                                <text x="165" y="272" font-family="Nunito" font-size="11" fill="#64748B" id="svg-text-protein-sub">(折疊分解塑膠/抗體鎖匙形狀)</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- 資訊說明框 -->
+                    <div id="info-card" class="bg-teal-50 border-2 border-teal-200 rounded-2xl p-5 flex items-start gap-4 transition-all mt-4">
+                        <div id="info-icon" class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-lightbulb"></i>
+                        </div>
+                        <div>
+                            <h4 id="info-title" class="font-heading text-lg font-bold text-teal-900">點擊上方生物元件進行探索！</h4>
+                            <p id="info-desc" class="text-sm text-teal-800 leading-relaxed mt-1">
+                                DNA 編輯讓我們能改寫密碼，讓細胞翻譯並**摺疊出具有特定形狀的蛋白質**，完美執行解決全球危機的任務！
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= 第二區塊：全球危機救援關卡 (SECTION 2: GLOBAL CRISES RESCUE GAME) ================= -->
+        <section id="section-game" class="hidden space-y-6 flex-1 flex flex-col">
+            
+            <!-- 遊戲關卡選擇標頭 -->
+            <div class="bg-white rounded-3xl p-4 md:p-6 shadow-md border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase" id="game-badge">全球危機救援任務</span>
+                        <h2 class="font-heading text-2xl font-bold text-slate-800" id="game-main-title">DNA 編輯與全球危機挑戰</h2>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1" id="game-main-desc">剪下舊 DNA，選擇能摺疊出正確形狀蛋白質的機能基因來解決全球危機！</p>
+                </div>
+
+                <!-- 關卡選擇器 (Level Selector Tabs) -->
+                <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0" id="level-buttons-container">
+                    <!-- 由 JavaScript 動態生成關卡按鈕 -->
+                </div>
+            </div>
+
+            <!-- 遊戲主舞台 (Modern Dark Navy Tech-Game Card) -->
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-slate-200/90 flex-1 flex flex-col justify-between space-y-6 relative overflow-hidden">
+                
+                <!-- 闖關步驟指示燈 (Step Progress Bar) -->
+                <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
+                    <div id="step-tab-1" class="py-2.5 rounded-xl bg-teal-600 text-white shadow-sm transition-all flex items-center justify-center gap-1.5">
+                        <span class="w-5 h-5 rounded-full bg-white/20 text-xs flex items-center justify-center">1</span> <span id="step-text-1">剪下舊 DNA</span>
+                    </div>
+                    <div id="step-tab-2" class="py-2.5 rounded-xl bg-slate-100 text-slate-400 transition-all flex items-center justify-center gap-1.5">
+                        <span class="w-5 h-5 rounded-full bg-slate-200 text-xs flex items-center justify-center">2</span> <span id="step-text-2">選擇特定形狀基因</span>
+                    </div>
+                    <div id="step-tab-3" class="py-2.5 rounded-xl bg-slate-100 text-slate-400 transition-all flex items-center justify-center gap-1.5">
+                        <span class="w-5 h-5 rounded-full bg-slate-200 text-xs flex items-center justify-center">3</span> <span id="step-text-3">解鎖目標蛋白質形狀</span>
+                    </div>
+                </div>
+
+                <!-- 故事任務卡片 (Story Mission Banner) -->
+                <div id="mission-info" class="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-inner">
+                    <div class="flex items-center gap-4">
+                        <div id="mission-icon-box" class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center text-3xl font-bold shadow-md shrink-0">
+                            🌊
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="bg-amber-400/20 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-400/30" id="level-tag">關卡 1</span>
+                                <h3 id="mission-title" class="font-heading text-lg md:text-xl font-bold text-amber-300">海洋塑膠微粒污染救援</h3>
+                            </div>
+                            <p id="mission-story" class="text-xs md:text-sm text-slate-200 leading-relaxed mt-1">
+                                海洋堆積大量塑膠垃圾威脅生物！請剪下舊基因，植入能摺疊出「幾何剪刀形狀 (PETase 塑膠分解酶)」蛋白質的基因！
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DNA 雙螺旋實驗工作台 (Dark Navy Tech Card for Mini-Game) -->
+                <div class="relative bg-slate-900 rounded-3xl p-4 md:p-8 border-4 border-slate-800 shadow-2xl min-h-[340px] flex flex-col justify-center items-center overflow-x-auto">
+                    
+                    <!-- SVG 平面向量圓形節點雙螺旋結構 -->
+                    <div class="w-full max-w-4xl min-w-[680px] flex justify-center items-center py-2">
+                        <svg id="game-dna-svg" viewBox="0 0 900 220" class="w-full h-auto">
+                            <!-- 由 JavaScript renderHelixBench 動態繪製渲染 -->
+                        </svg>
+                    </div>
+
+                    <!-- 操作提示橫幅 -->
+                    <div id="action-prompt" class="mt-2 text-center">
+                        <p class="text-sm font-bold text-emerald-400 animate-pulse" id="prompt-text">
+                            <i class="fa-solid fa-scissors mr-1"></i> 點擊綠色的目標 DNA 結構，使用分子剪刀切除舊基因！
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- 可選 DNA 功能片段清單 (STEP 2: DNA Fragment Selection) -->
+                <div id="desired-inventory" class="hidden bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-5 transition-all space-y-3">
+                    <div class="text-center">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider" id="inventory-title">
+                            請選擇能摺疊出「目標鎖匙形狀」的 DNA 功能基因進行拼接：
+                        </h4>
+                    </div>
+                    <div id="insert-options" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <!-- 由 JavaScript 動態生成 3 個具有不同蛋白質形狀的 DNA 片段選項 -->
+                    </div>
+                </div>
+
+                <!-- 蛋白質培育成功與 3D 形狀表達 (STEP 3: Result) -->
+                <div id="protein-result" class="hidden bg-gradient-to-br from-emerald-900 to-slate-900 text-white rounded-2xl p-6 text-center space-y-4 shadow-xl border border-emerald-500/30">
+                    <div id="result-icon-anim" class="w-24 h-24 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-5xl animate-pulse-glow animate-fold">
+                        ♻️
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest" id="result-status-text">🎉 全球危機成功解決！</span>
+                        <h3 id="result-protein-name" class="font-heading text-2xl font-bold text-white mt-1">PETase 塑膠分解酵素 (Shape Unlocked)</h3>
+                        <p id="result-protein-desc" class="text-sm text-slate-300 max-w-xl mx-auto mt-2 leading-relaxed">
+                            益生菌成功合成了幾何剪刀形狀的 PET 塑膠分解酶，精準切斷塑膠高分子鏈，淨化海洋與環境！
+                        </p>
+                    </div>
+
+                    <div class="pt-2 flex flex-wrap justify-center gap-3">
+                        <button id="next-level-btn" onclick="goToNextLevel()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-heading font-bold px-6 py-2.5 rounded-xl transition shadow-lg text-sm">
+                            <i class="fa-solid fa-circle-arrow-right mr-1"></i> <span id="btn-next-text">前往下一關卡</span>
+                        </button>
+                        <button onclick="resetLabGame()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-heading font-bold px-5 py-2.5 rounded-xl transition text-sm">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> <span id="btn-retry-text">重新挑戰本關</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- 頁尾 (Footer) -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
+        <p id="footer-text">GeneCraft Jr. 基因巧手實驗室 • 專為青少年設計的 DNA 編輯與全球危機學習平台</p>
+    </footer>
+
+    <!-- JavaScript 邏輯 (多語言與全球危機關卡) -->
+    <script>
+        // 安全 DOM 設定工具函式
+        function setElementText(id, text, isHtml = false) {
+            const el = document.getElementById(id);
+            if (el) {
+                if (isHtml) {
+                    el.innerHTML = text;
+                } else {
+                    el.textContent = text;
+                }
+            }
+        }
+
+        // ================= 1. 多語言文本庫 (i18n Translations) =================
+        let currentLang = 'zh'; // 預設繁體中文
+
+        const TRANSLATIONS = {
+            zh: {
+                title: "GeneCraft Jr.",
+                subtitle: "DNA 編輯探索 • 解決全球重大危機",
+                langBtn: "English",
+                navLearn: "為什麼需要 DNA 編輯？",
+                navGame: "全球危機救援戰",
+                heroBadge: "分子生物學核心概念",
+                heroTitle: "為什麼我們需要 DNA 編輯？",
+                heroDesc: "因為「DNA 密碼 ➔ 蛋白質 3D 形狀 (Shape) ➔ 生物功能 (Function)」！全球面臨的廢電池資源回收、塑膠污染、氣候乾旱、病毒傳播與碳排放等危機，都需要特定「3D 幾何形狀」的蛋白質來解決。透過 DNA 編輯，我們能為細胞寫入正確藍圖，摺疊出解決問題的蛋白質鑰匙！",
+                heroBtn: "進入全球危機救援遊戲",
+                principleTitle: "🔑 生命的黃金法則：DNA ➔ 蛋白質形狀 ➔ 生物功能",
+                principleSubtitle: "蛋白質就像一把鑰匙，必須摺疊出正確的「3D 幾何形狀」，才能完美鎖定並解決特定的全球危機！",
+                flowStep1Title: "1. DNA 藍圖編碼",
+                flowStep1Desc: "DNA 上排列著 A、T、C、G 鹼基序列，記載著蛋白質的組成密碼。",
+                flowStep2Title: "2. 蛋白質 3D 摺疊",
+                flowStep2Desc: "氨基酸鏈扭轉扭結，摺疊成獨一無二的「3D 幾何形狀」（如金屬螯合口袋、剪刀形、網狀形）。",
+                flowStep3Title: "3. 鎖匙配對解決危機",
+                flowStep3Desc: "特定形狀的蛋白質精準鎖定目標（如螯合回收 Li₂CO₃/CoSO₄/NiSO₄、分解塑膠、捕獲 CO₂）！",
+                anatomyTitle: "DNA 編輯的標準結構圖解",
+                badgeTarget: "目標基因位置",
+                badgeScissors: "DNA 分子剪刀",
+                badgeDesired: "優良機能 DNA",
+                badgeProtein: "特化形狀蛋白質",
+                infoDefaultTitle: "點擊上方生物元件進行探索！",
+                infoDefaultDesc: "DNA 編輯讓我們能改寫密碼，讓細胞翻譯並摺疊出具有特定形狀的蛋白質，完美執行拯救作物的任務！",
+                gameBadge: "全球危機救援任務",
+                gameMainTitle: "DNA 編輯與全球危機挑戰",
+                gameMainDesc: "剪下舊 DNA，選擇能摺疊出正確形狀蛋白質的機能基因來解決全球危機！",
+                stepText1: "剪下舊 DNA",
+                stepText2: "選擇特定形狀基因",
+                stepText3: "解鎖目標蛋白質形狀",
+                promptStep1: "點擊綠色的目標 DNA 結構，使用分子剪刀切除舊基因！",
+                promptStep2: "目標 DNA 已切除！請選擇能摺疊出解決危機「鎖匙形狀」的 DNA 功能基因。",
+                promptStep3: "基因拼接完成！細胞正在摺疊目標形狀的蛋白質...",
+                inventoryTitle: "請選擇能摺疊出「目標鎖匙形狀」的 DNA 功能基因進行拼接：",
+                resultStatus: "🎉 全球危機成功解決！",
+                btnNext: "前往下一關卡",
+                btnRetry: "重新挑戰本關",
+                footer: "GeneCraft Jr. 基因巧手實驗室 • 專為青少年設計的 DNA 編輯與全球危機學習平台",
+                cutSiteText: "✂️ DNA 剪切缺口",
+                cutSiteSub: "(等待優良基因黏合)",
+                targetClickText: "✂️ 目標 DNA (點擊剪下)",
+                wrongChoiceAlert: "這個基因摺疊出的蛋白質形狀無法匹配解決當前的危機哦！請仔細閱讀形狀與功能說明再試一次！",
+                proteinSub: "(折疊分解塑膠/抗體鎖匙形狀)"
+            },
+            en: {
+                title: "GeneCraft Jr.",
+                subtitle: "DNA Editing & Global Crises Solutions",
+                langBtn: "繁體中文",
+                navLearn: "Why DNA Editing?",
+                navGame: "Global Crises Rescue",
+                heroBadge: "Core Biological Principle",
+                heroTitle: "Why Do We Need DNA Editing?",
+                heroDesc: "Because DNA Code ➔ 3D Protein Shape ➔ Biological Function! Global crises like EV battery recycling, plastic pollution, drought, viruses, and carbon emissions require proteins with exact 3D geometry. Through DNA editing, we write the blueprint for cells to fold specific protein keys that solve global problems!",
+                heroBtn: "Start Global Rescue Missions",
+                principleTitle: "🔑 The Core Principle: DNA ➔ Protein Shape ➔ Global Function",
+                principleSubtitle: "Proteins work like key locks: they must fold into exact 3D geometry to target and solve global challenges!",
+                flowStep1Title: "1. DNA Nucleotide Code",
+                flowStep1Desc: "Sequences of A, T, C, G bases specify the blueprint for amino acid chains.",
+                flowStep2Title: "2. 3D Protein Folding",
+                flowStep2Desc: "Amino acid chains twist into unique 3D molecular shapes (metal-chelating pockets, catalytic scissors, key locks, protective meshes).",
+                flowStep3Title: "3. Lock & Key Crisis Solution",
+                flowStep3Desc: "Proteins with specific shapes lock onto target molecules (bio-chelate Li₂CO₃, CoSO₄, NiSO₄, break down plastics, capture CO₂)!",
+                anatomyTitle: "Standard DNA Editing Structure",
+                badgeTarget: "Target Gene Location",
+                badgeScissors: "Molecular Scissors",
+                badgeDesired: "Desired Functional Gene",
+                badgeProtein: "Specialized Folded Protein",
+                infoDefaultTitle: "Click on any component above!",
+                infoDefaultDesc: "DNA editing allows us to rewrite the blueprint so cells translate and fold proteins into specific 3D shapes needed to solve global crises!",
+                gameBadge: "Global Crises Rescue Missions",
+                gameMainTitle: "DNA Editing & Global Crises Challenge",
+                gameMainDesc: "Snip target DNA and select genes that fold into the exact protein shape needed!",
+                stepText1: "Cut Unfavorable DNA",
+                stepText2: "Select Functional Shape Gene",
+                stepText3: "Unlock Target Protein Shape",
+                promptStep1: "Click the GREEN Target DNA Structure to cut it with molecular scissors!",
+                promptStep2: "Target cut! Choose the functional gene below that folds into the required 3D key shape.",
+                promptStep3: "Gene spliced! Cells are folding the functional 3D protein...",
+                inventoryTitle: "Select the functional gene that folds into the required lock-and-key shape:",
+                resultStatus: "🎉 Global Crisis Solved!",
+                btnNext: "Proceed to Next Level",
+                btnRetry: "Retry This Level",
+                footer: "GeneCraft Jr. • DNA Editing & Global Crises Solutions for Junior Scientists",
+                cutSiteText: "✂️ DNA Cut Break",
+                cutSiteSub: "(Awaiting functional insert)",
+                targetClickText: "✂️ Target DNA (Click to Cut)",
+                wrongChoiceAlert: "This gene folds into a protein shape that doesn't fit the crisis target! Read the shape descriptions carefully and try again.",
+                proteinSub: "(Folded key shape for plastic/antibody defense)"
+            }
+        };
+
+        // 元件學習詳細解說庫
+        const COMPONENT_INFO = {
+            zh: {
+                target: { title: "目標基因位置", desc: "DNA 雙螺旋鏈解開區域中需要修剪的舊基因，例如無法合成金屬螯合蛋白、塑膠分解酶或抗體的舊序列。" },
+                scissors: { title: "DNA 分子剪刀", desc: "精準切斷 DNA 雙螺旋鏈的酵素剪刀，為優良機能基因留下插入缺口。" },
+                desired: { title: "優良機能 DNA", desc: "帶有全新幾何藍圖的 DNA 片段，引導細胞合成出具有特定 3D 鎖匙形狀的優良蛋白質。" },
+                protein: { title: "特化形狀蛋白質", desc: "擁有特定幾何形狀（如金屬螯合口袋形、剪刀形、抗體鎖匙形、催化網狀）的蛋白質，能精準鎖定並解決全球危機！" }
+            },
+            en: {
+                target: { title: "Target Gene Location", desc: "Region in unwound DNA bubble that fails to code for functional protein shapes." },
+                scissors: { title: "Molecular Scissors", desc: "Precision enzymes cutting through DNA strands to prepare for a functional gene insert." },
+                desired: { title: "Desired Functional Gene", desc: "New gene encoding specific structural blueprints for folding functional 3D proteins." },
+                protein: { title: "Specialized Folded Protein", desc: "Proteins with exact 3D shapes (metal-chelating pockets, catalytic scissors, antibody keys, carbon-capture meshes) that solve global challenges!" }
+            }
+        };
+
+        // ================= 2. 全球危機關卡資料庫 (GLOBAL CRISES MISSIONS) =================
+        const MISSIONS = [
+            {
+                id: 1,
+                tag: { zh: "關卡 1", en: "Level 1" },
+                icon: "🌊",
+                title: { zh: "海洋塑膠微粒污染 (幾何剪刀形狀)", en: "Ocean Plastic Pollution (PETase Scissors)" },
+                story: { 
+                    zh: "海洋堆積大量塑膠微粒威脅生態！請剪下舊基因，植入能摺疊出「幾何剪刀形狀 (PETase 塑膠分解酶)」蛋白質的基因！",
+                    en: "Ocean microplastics threaten marine life! Snip old DNA and splice a gene folding into a PETase plastic-decomposing scissors shape!"
+                },
+                targetSeq: ["A", "C", "T", "G", "G", "C"],
+                fragments: [
+                    {
+                        id: "petase",
+                        isCorrect: true,
+                        shapeIcon: "✂️♻️",
+                        title: { zh: "PET 塑膠分解幾何剪刀形狀基因", en: "PETase Plastic-Cutting Scissors Shape Gene" },
+                        desc: { zh: "摺疊成塑膠分子卡槽剪刀形狀，精準切斷高分子鏈，將塑膠分解為無害物質！", en: "Folds into molecular scissors geometry that cuts PET polymer chains into harmless substances!" },
+                        icon: "♻️"
+                    },
+                    {
+                        id: "sweet",
+                        isCorrect: false,
+                        shapeIcon: "🍬🔮",
+                        title: { zh: "甜味果糖球形基因", en: "Sweet Fructose Sphere Gene" },
+                        desc: { zh: "摺疊成果糖合成球體（無法切斷塑膠分子）。", en: "Folds into sugar synthesis spheres (cannot decompose plastic)." },
+                        icon: "🍬"
+                    },
+                    {
+                        id: "junk",
+                        isCorrect: false,
+                        shapeIcon: "❓📦",
+                        title: { zh: "無效平坦結構片段", en: "Flat Non-Coding Segment" },
+                        desc: { zh: "無法摺疊出任何功能性 3D 形狀。", en: "Fails to fold into any functional 3D shape." },
+                        icon: "❓"
+                    }
+                ],
+                resultName: { zh: "PETase 塑膠分解酵素 (Shape Unlocked)", en: "PETase Plastic-Digesting Enzyme (Shape Unlocked)" },
+                resultDesc: { 
+                    zh: "益生菌成功合成了幾何剪刀形狀的 PET 塑膠分解酶，精準切斷塑膠高分子鏈，迅速將海洋微塑膠分解為無害物質！", 
+                    en: "Bacteria folded PETase enzymes into exact catalytic scissor shapes, breaking down microplastics and purifying ocean waters!" 
+                },
+                resultIcon: "🐬"
+            },
+            {
+                id: 2,
+                tag: { zh: "關卡 2", en: "Level 2" },
+                icon: "🌾",
+                title: { zh: "全球糧食與極端乾旱 (深根保水形狀)", en: "Drought & Food Crisis (Water-Lock Shape)" },
+                story: { 
+                    zh: "嚴重氣候乾旱導致作物大量枯萎！請剪下舊基因，植入能摺疊出「深根鎖水鎖匙形狀」蛋白質的基因！",
+                    en: "Severe climate drought causes crop failure! Snip old DNA and splice a gene folding into a deep-root water-locking protein shape!"
+                },
+                targetSeq: ["T", "C", "G", "A", "A", "C"],
+                fragments: [
+                    {
+                        id: "color",
+                        isCorrect: false,
+                        shapeIcon: "🎨🟣",
+                        title: { zh: "紫色色素星形基因", en: "Purple Pigment Star Gene" },
+                        desc: { zh: "摺疊成色素星形結構（無法鎖住水分）。", en: "Folds into pigment star shapes (cannot retain soil water)." },
+                        icon: "🎨"
+                    },
+                    {
+                        id: "drought",
+                        isCorrect: true,
+                        shapeIcon: "💧🔒",
+                        title: { zh: "深根保水鎖匙形狀基因", en: "Deep-Root Water-Locking Shape Gene" },
+                        desc: { zh: "摺疊出水分子鎖定幾何形狀，幫助作物根系牢牢鎖住地底水分！", en: "Folds into a water-molecule locking shape to help crop roots retain deep soil moisture!" },
+                        icon: "💧"
+                    },
+                    {
+                        id: "cold",
+                        isCorrect: false,
+                        shapeIcon: "❄️🧊",
+                        title: { zh: "極地抗凍晶體基因", en: "Arctic Anti-Freeze Crystal Gene" },
+                        desc: { zh: "摺疊成抗冰結晶（乾旱下無法吸水）。", en: "Folds into anti-ice crystals (cannot absorb drought water)." },
+                        icon: "❄️"
+                    }
+                ],
+                resultName: { zh: "深根鎖水型蛋白質 (Shape Unlocked)", en: "Deep-Root Water-Locking Protein (Shape Unlocked)" },
+                resultDesc: { 
+                    zh: "作物成功合成了鎖水幾何形狀的蛋白質，精準鎖住水分子，根系深扎乾旱土壤，喜獲黃金大豐收！", 
+                    en: "Crops folded proteins into exact water-locking shapes, securing water molecules so fields thrive during severe drought!" 
+                },
+                resultIcon: "🌾"
+            },
+            {
+                id: 3,
+                tag: { zh: "關卡 3", en: "Level 3" },
+                icon: "🦠",
+                title: { zh: "全球新型傳染病防治 (病毒中和鎖匙形狀)", en: "Global Disease Defense (Neutralizing Key Shape)" },
+                story: { 
+                    zh: "新型傳染病威脅全球健康！請剪下舊基因，植入能摺疊出「病毒表面中和鎖匙形狀 (精準抗體)」蛋白質的基因！",
+                    en: "A novel infectious virus threatens global health! Snip old DNA and graft a gene folding into a virus-neutralizing antibody key shape!"
+                },
+                targetSeq: ["G", "C", "T", "A", "T", "T"],
+                fragments: [
+                    {
+                        id: "glow",
+                        isCorrect: false,
+                        shapeIcon: "✨🟡",
+                        title: { zh: "夜光環形蛋白基因", en: "Night-Glow Ring Gene" },
+                        desc: { zh: "摺疊成環形發光體（無法中和病毒）。", en: "Folds into glowing rings (does not neutralize viruses)." },
+                        icon: "✨"
+                    },
+                    {
+                        id: "virus",
+                        isCorrect: true,
+                        shapeIcon: "🦠🔑",
+                        title: { zh: "病毒刺突中和鎖匙形狀基因", en: "Virus-Spike Neutralizing Key Shape Gene" },
+                        desc: { zh: "摺疊成 Y 型特化鎖匙抗體，精準鎖定並卡住病毒表面蛋白，阻止感染！", en: "Folds into Y-shaped neutralizing key antibodies that physically block virus infection!" },
+                        icon: "🛡️"
+                    },
+                    {
+                        id: "aroma",
+                        isCorrect: false,
+                        shapeIcon: "🌸螺旋",
+                        title: { zh: "香氣螺旋蛋白基因", en: "Fragrance Helix Gene" },
+                        desc: { zh: "摺疊成香氣分子螺旋（無病毒防禦作用）。", en: "Folds into scent spirals (no antiviral protection)." },
+                        icon: "🌸"
+                    }
+                ],
+                resultName: { zh: "病毒中和特化抗體 (Shape Unlocked)", en: "Neutralizing Key Antibody (Shape Unlocked)" },
+                resultDesc: { 
+                    zh: "細胞成功合成了精準 Y 型鎖匙幾何形狀的抗體蛋白質，徹底卡住病毒外殼，成功化解全球傳染病危機！", 
+                    en: "Cells folded Y-shaped antibody keys with exact geometry, physically locking onto viruses to stop global disease spread!" 
+                },
+                resultIcon: "💉"
+            },
+            {
+                id: 4,
+                tag: { zh: "關卡 4", en: "Level 4" },
+                icon: "🏭",
+                title: { zh: "工業廢氣與全球暖化 (高效固碳催化網狀形狀)", en: "Global Carbon Capture (Carbon-Capture Mesh Shape)" },
+                story: { 
+                    zh: "溫室氣體二氧化碳排放過量造成全球暖化！請剪下低效基因，植入能摺疊出「碳捕獲催化網狀形狀」蛋白質的基因！",
+                    en: "Excess CO₂ causes severe global warming! Snip low-efficiency DNA and insert a gene folding into a carbon-capturing catalytic mesh shape!"
+                },
+                targetSeq: ["C", "A", "G", "T", "T", "A"],
+                fragments: [
+                    {
+                        id: "carbon",
+                        isCorrect: true,
+                        shapeIcon: "🏭🕸️",
+                        title: { zh: "二氧化碳捕獲催化網狀形狀基因", en: "CO₂ Capturing Catalytic Mesh Shape Gene" },
+                        desc: { zh: "摺疊出 CO₂ 高效吸附幾何網格，迅速將大氣二氧化碳轉化為穩定有機物！", en: "Folds into a CO₂ absorbing catalytic mesh that rapidly converts atmospheric carbon into stable organics!" },
+                        icon: "🌿"
+                    },
+                    {
+                        id: "size",
+                        isCorrect: false,
+                        shapeIcon: "🍃巨形",
+                        title: { zh: "巨型葉片擴展形狀基因", en: "Giant-Leaf Expansion Shape Gene" },
+                        desc: { zh: "摺疊成葉片擴展蛋白質（固碳效率極低）。", en: "Folds into leaf-expansion proteins (low carbon capture efficiency)." },
+                        icon: "🍃"
+                    },
+                    {
+                        id: "junk",
+                        isCorrect: false,
+                        shapeIcon: "❓線條",
+                        title: { zh: "無效直線重複鏈", en: "Linear Repeat Fragment" },
+                        desc: { zh: "無法摺疊出任何碳捕獲催化網結構。", en: "No carbon capture catalytic structure." },
+                        icon: "❓"
+                    }
+                ],
+                resultName: { zh: "高效固碳催化酵素 (Shape Unlocked)", en: "High-Efficiency Carbon-Capture Enzyme (Shape Unlocked)" },
+                resultDesc: { 
+                    zh: "綠藻成功合成了碳捕獲幾何網格形狀的催化酵素，大量吸附大氣中的二氧化碳，大幅減緩全球暖化！", 
+                    en: "Algae synthesized catalytic proteins with carbon-capturing mesh geometry, absorbing atmospheric CO₂ to combat global warming!" 
+                },
+                resultIcon: "🌱"
+            },
+            {
+                id: 5,
+                tag: { zh: "關卡 5", en: "Level 5" },
+                icon: "🔋",
+                title: { zh: "電動車廢電池資源回收 (Li₂CO₃/CoSO₄/NiSO₄ 螯合口袋)", en: "EV Battery Bio-Recycling (Lithium/Cobalt/Nickel Chelation)" },
+                story: { 
+                    zh: "全球廢棄電動車 (EV) 電池威脅環境！請剪下舊基因，植入能摺疊出「金屬特異性螯合口袋形狀」生物浸出蛋白的基因，綠色回收 Li₂CO₃、CoSO₄ 與 NiSO₄！",
+                    en: "Millions of spent EV batteries pose grave pollution! Snip native DNA and splice a gene folding into a metal-chelating 3D pocket to bio-recover Li₂CO₃, CoSO₄ & NiSO₄!"
+                },
+                targetSeq: ["A", "T", "G", "C", "A", "T"],
+                fragments: [
+                    {
+                        id: "battery_recycle",
+                        isCorrect: true,
+                        shapeIcon: "🔋💎",
+                        title: { zh: "金屬螯合口袋 3D 形狀基因", en: "Metal-Chelating 3D Pocket Shape Gene" },
+                        desc: { zh: "摺疊出精準金屬配位口袋，選擇性結合並沉澱出高純度碳酸鋰 (Li₂CO₃)、硫酸鈷 (CoSO₄) 與硫酸鎳 (NiSO₄)！", en: "Folds into specialized coordination pockets that selectively capture and precipitate pure Li₂CO₃, CoSO₄, and NiSO₄ from battery waste!" },
+                        icon: "⚡"
+                    },
+                    {
+                        id: "oil_degrease",
+                        isCorrect: false,
+                        shapeIcon: "🛢️🫧",
+                        title: { zh: "油脂分解球形蛋白基因", en: "Lipid-Degrading Sphere Gene" },
+                        desc: { zh: "摺疊成油脂分解球體（無法結合廢電池重金屬）。", en: "Folds into oil-digesting spheres (cannot bind heavy metals in EV batteries)." },
+                        icon: "🛢️"
+                    },
+                    {
+                        id: "plastic_junk",
+                        isCorrect: false,
+                        shapeIcon: "❓平坦",
+                        title: { zh: "平坦無特化受體片段", en: "Flat Non-Binding Fragment" },
+                        desc: { zh: "無法摺疊出任何金屬捕獲結構。", en: "Cannot fold into any metal-binding receptor pocket." },
+                        icon: "❓"
+                    }
+                ],
+                resultName: { zh: "高純度 Li₂CO₃ / CoSO₄ / NiSO₄ 螯合回收蛋白 (Recycling Complete)", en: "High-Purity Li₂CO₃ / CoSO₄ / NiSO₄ Recovered (Recycling Complete)" },
+                resultDesc: { 
+                    zh: "工程菌株成功合成了金屬螯合口袋蛋白質，從 EV 廢電池黑粉中精準提取出高純度的碳酸鋰 (Li₂CO₃)、硫酸鈷 (CoSO₄) 與硫酸鎳 (NiSO₄)，實現真正的零污染綠色循環經濟！", 
+                    en: "Engineered microbes synthesized metal-binding pocket proteins, precisely bio-extracting high-purity Li₂CO₃, CoSO₄, and NiSO₄ from spent EV batteries to establish a green circular economy!" 
+                },
+                resultIcon: "⚡"
+            }
+        ];
+
+        // 遊戲狀態 (Game States)
+        let currentLevelIdx = 0;
+        let gameStep = 1; // 1: Cut, 2: Insert, 3: Success
+        let targetCut = false;
+        let geneInserted = false;
+
+        // ================= 3. 語言切換邏輯 (Language Toggle) =================
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = TRANSLATIONS[currentLang];
+
+            // 靜態 UI 元素更新
+            setElementText('ui-title', t.title);
+            setElementText('ui-subtitle', t.subtitle);
+            setElementText('lang-btn-text', t.langBtn);
+            setElementText('nav-learn-text', t.navLearn);
+            setElementText('nav-game-text', t.navGame);
+
+            setElementText('hero-badge', t.heroBadge);
+            setElementText('hero-title', t.heroTitle);
+            setElementText('hero-desc', t.heroDesc, true);
+            setElementText('hero-btn', t.heroBtn);
+
+            setElementText('principle-title', t.principleTitle);
+            setElementText('principle-subtitle', t.principleSubtitle);
+
+            setElementText('flow-step1-title', t.flowStep1Title);
+            setElementText('flow-step1-desc', t.flowStep1Desc);
+            setElementText('flow-step2-title', t.flowStep2Title);
+            setElementText('flow-step2-desc', t.flowStep2Desc);
+            setElementText('flow-step3-title', t.flowStep3Title);
+            setElementText('flow-step3-desc', t.flowStep3Desc);
+
+            setElementText('anatomy-title', t.anatomyTitle);
+
+            // 標籤按鈕
+            document.querySelectorAll('[data-i18n="badge-target"]').forEach(el => el.innerText = t.badgeTarget);
+            document.querySelectorAll('[data-i18n="badge-scissors"]').forEach(el => el.innerText = t.badgeScissors);
+            document.querySelectorAll('[data-i18n="badge-desired"]').forEach(el => el.innerText = t.badgeDesired);
+            document.querySelectorAll('[data-i18n="badge-protein"]').forEach(el => el.innerText = t.badgeProtein);
+
+            // SVG 圖解內部文字
+            setElementText('svg-text-target', t.badgeTarget);
+            setElementText('svg-text-scissors', t.badgeScissors);
+            setElementText('svg-text-scissors-sub', "(精準切斷 DNA)");
+            setElementText('svg-text-desired', t.badgeDesired);
+            setElementText('svg-text-protein', t.badgeProtein);
+            setElementText('svg-text-protein-sub', t.proteinSub);
+
+            // 遊戲頁面靜態文字
+            setElementText('game-badge', t.gameBadge);
+            setElementText('game-main-title', t.gameMainTitle);
+            setElementText('game-main-desc', t.gameMainDesc);
+            setElementText('step-text-1', t.stepText1);
+            setElementText('step-text-2', t.stepText2);
+            setElementText('step-text-3', t.stepText3);
+            setElementText('inventory-title', t.inventoryTitle);
+            setElementText('result-status-text', t.resultStatus);
+            setElementText('btn-next-text', t.btnNext);
+            setElementText('btn-retry-text', t.btnRetry);
+            setElementText('footer-text', t.footer);
+
+            // 重新載入當前關卡與 DNA 工作台繪製
+            highlightComponent('target');
+            renderLevelButtons();
+            loadCurrentMission();
+        }
+
+        // ================= 4. 分頁切換 (Tab Switcher) =================
+        function switchTab(tab) {
+            const learnSec = document.getElementById('section-learn');
+            const gameSec = document.getElementById('section-game');
+            const navLearn = document.getElementById('nav-learn');
+            const navGame = document.getElementById('nav-game');
+
+            if (tab === 'learn') {
+                learnSec.classList.remove('hidden');
+                gameSec.classList.add('hidden');
+                
+                navLearn.className = "px-4 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-white text-teal-700 shadow-sm";
+                navGame.className = "px-4 py-1.5 rounded-xl text-xs md:text-sm font-bold text-slate-600 hover:text-teal-700 transition-all duration-200";
+            } else {
+                learnSec.classList.add('hidden');
+                gameSec.classList.remove('hidden');
+
+                navGame.className = "px-4 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-white text-teal-700 shadow-sm";
+                navLearn.className = "px-4 py-1.5 rounded-xl text-xs md:text-sm font-bold text-slate-600 hover:text-teal-700 transition-all duration-200";
+                
+                loadCurrentMission();
+            }
+        }
+
+        // ================= 5. 原理頁面互動元件亮燈 (Component Highlight) =================
+        function highlightComponent(key) {
+            const info = COMPONENT_INFO[currentLang][key] || COMPONENT_INFO[currentLang]['target'];
+            
+            setElementText('info-title', info.title);
+            setElementText('info-desc', info.desc);
+
+            // 重置所有 SVG 亮光
+            ['svg-target', 'svg-scissors', 'svg-desired', 'svg-protein'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.filter = "none";
+            });
+
+            // 高亮選取的元件
+            const targetEl = document.getElementById(`svg-${key}`);
+            if (targetEl) {
+                targetEl.style.filter = "drop-shadow(0 0 12px rgba(13, 148, 136, 0.95))";
+            }
+        }
+
+        // ================= 6. 氣候關卡遊戲邏輯 (Game Logic) =================
+        
+        function renderLevelButtons() {
+            const container = document.getElementById('level-buttons-container');
+            if (!container) return;
+            container.innerHTML = "";
+
+            MISSIONS.forEach((m, idx) => {
+                const btn = document.createElement('button');
+                const isSelected = idx === currentLevelIdx;
+                
+                btn.className = isSelected 
+                    ? "px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-teal-600 text-white shadow-md border border-teal-500 shrink-0"
+                    : "px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0";
+                
+                btn.innerHTML = `<span>${m.icon}</span> <span>${m.tag[currentLang]}</span>`;
+                btn.onclick = () => selectLevel(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectLevel(idx) {
+            currentLevelIdx = idx;
+            renderLevelButtons();
+            loadCurrentMission();
+        }
+
+        function loadCurrentMission() {
+            const mission = MISSIONS[currentLevelIdx];
+            gameStep = 1;
+            targetCut = false;
+            geneInserted = false;
+
+            // 更新故事卡片
+            setElementText('level-tag', mission.tag[currentLang]);
+            setElementText('mission-title', mission.title[currentLang]);
+            setElementText('mission-story', mission.story[currentLang]);
+            setElementText('mission-icon-box', mission.icon);
+
+            const resultEl = document.getElementById('protein-result');
+            const invEl = document.getElementById('desired-inventory');
+            if (resultEl) resultEl.classList.add('hidden');
+            if (invEl) invEl.classList.add('hidden');
+
+            updateStepIndicator(1);
+            renderHelixBench();
+        }
+
+        function updateStepIndicator(step) {
+            gameStep = step;
+            const t1 = document.getElementById('step-tab-1');
+            const t2 = document.getElementById('step-tab-2');
+            const t3 = document.getElementById('step-tab-3');
+
+            if (t1) t1.className = step === 1 ? "py-2.5 rounded-xl bg-teal-600 text-white shadow-sm transition-all flex items-center justify-center gap-1.5" : "py-2.5 rounded-xl bg-slate-100 text-slate-400 transition-all flex items-center justify-center gap-1.5";
+            if (t2) t2.className = step === 2 ? "py-2.5 rounded-xl bg-teal-600 text-white shadow-sm transition-all flex items-center justify-center gap-1.5" : "py-2.5 rounded-xl bg-slate-100 text-slate-400 transition-all flex items-center justify-center gap-1.5";
+            if (t3) t3.className = step === 3 ? "py-2.5 rounded-xl bg-teal-600 text-white shadow-sm transition-all flex items-center justify-center gap-1.5" : "py-2.5 rounded-xl bg-slate-100 text-slate-400 transition-all flex items-center justify-center gap-1.5";
+
+            const prompt = document.getElementById('prompt-text');
+            const t = TRANSLATIONS[currentLang];
+            if (prompt) {
+                if (step === 1) {
+                    prompt.className = "text-sm font-bold text-emerald-400 animate-pulse";
+                    prompt.innerHTML = `<i class="fa-solid fa-scissors mr-1"></i> ${t.promptStep1}`;
+                } else if (step === 2) {
+                    prompt.className = "text-sm font-bold text-amber-300";
+                    prompt.innerHTML = `<i class="fa-solid fa-circle-down mr-1"></i> ${t.promptStep2}`;
+                } else if (step === 3) {
+                    prompt.className = "text-sm font-bold text-teal-300";
+                    prompt.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ${t.promptStep3}`;
+                }
+            }
+        }
+
+        // ================= 7. SVG 繪製 DNA 工作台 (Vector Flat Style with Circular Base Nodes) =================
+        function renderHelixBench() {
+            const svg = document.getElementById('game-dna-svg');
+            if (!svg) return;
+            svg.innerHTML = "";
+
+            const mission = MISSIONS[currentLevelIdx];
+            const t = TRANSLATIONS[currentLang];
+            const complementMap = { "A":"T", "T":"A", "C":"G", "G":"C" };
+
+            // 鹼基對序列定義：左側 3 對 (亮藍)、中間 6 對 (目標/切口/插入)、右側 3 對 (亮藍)
+            const leftTop = ["T", "A", "G"];
+            const leftBottom = ["A", "T", "C"];
+
+            const rightTop = ["G", "A", "A"];
+            const rightBottom = ["C", "T", "T"];
+
+            const targetTop = mission.targetSeq || ["A", "C", "T", "G", "G", "C"];
+            const targetBottom = targetTop.map(b => complementMap[b] || "T");
+
+            const insertedTop = ["G", "E", "N", "E", "O", "K"];
+
+            // 數學計算雙螺旋圓點與連線座標
+            const startX = 75;
+            const spacing = 62;
+
+            const gDNA = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+            // 輔助建立單一圓形鹼基點 (Circular Node)
+            function createNode(x, y, baseText, colorTheme) {
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                
+                // 主圓形
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', '17');
+
+                let fillColor = '#0284C7';
+                let strokeColor = '#38BDF8';
+                let textColor = '#FFFFFF';
+
+                if (colorTheme === 'blue') {
+                    fillColor = '#0284C7'; strokeColor = '#38BDF8'; textColor = '#FFFFFF';
+                } else if (colorTheme === 'green') {
+                    fillColor = '#16A34A'; strokeColor = '#4ADE80'; textColor = '#FFFFFF';
+                } else if (colorTheme === 'red') {
+                    fillColor = '#E11D48'; strokeColor = '#FB7185'; textColor = '#FFFFFF';
+                }
+
+                circle.setAttribute('fill', fillColor);
+                circle.setAttribute('stroke', strokeColor);
+                circle.setAttribute('stroke-width', '2.5');
+
+                // 內部鹼基文字
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x);
+                text.setAttribute('y', y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-family', 'Fredoka');
+                text.setAttribute('font-size', '13');
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('fill', textColor);
+                text.textContent = baseText;
+
+                group.appendChild(circle);
+                group.appendChild(text);
+                return group;
+            }
+
+            // 生成完整的雙螺旋節點陣列
+            let nodesList = [];
+
+            // 1. 左側藍色區域 (3 Base Pairs)
+            for (let i = 0; i < 3; i++) {
+                nodesList.push({
+                    type: 'blue',
+                    top: leftTop[i],
+                    bottom: leftBottom[i]
+                });
+            }
+
+            // 2. 中間目標/剪切/插入區域 (6 Base Pairs or Gap)
+            if (!targetCut) {
+                for (let i = 0; i < 6; i++) {
+                    nodesList.push({
+                        type: 'green',
+                        top: targetTop[i],
+                        bottom: targetBottom[i]
+                    });
+                }
+            } else if (geneInserted) {
+                for (let i = 0; i < 6; i++) {
+                    nodesList.push({
+                        type: 'red',
+                        top: insertedTop[i] || 'G',
+                        bottom: complementMap[insertedTop[i]] || 'C'
+                    });
+                }
+            } else {
+                // Gap
+                nodesList.push({ type: 'gap' });
+            }
+
+            // 3. 右側藍色區域 (3 Base Pairs)
+            for (let i = 0; i < 3; i++) {
+                nodesList.push({
+                    type: 'blue',
+                    top: rightTop[i],
+                    bottom: rightBottom[i]
+                });
+            }
+
+            // 繪製骨架縱橫連線與圓點
+            let topPathD = "";
+            let bottomPathD = "";
+            let currentX = startX;
+
+            let targetMinX = 999, targetMaxX = 0;
+
+            let plottedNodes = [];
+
+            nodesList.forEach((item, index) => {
+                if (item.type === 'gap') {
+                    const gapWidth = 180;
+                    currentX += gapWidth;
+                    plottedNodes.push({ type: 'gap', x: currentX - gapWidth / 2 });
+                } else {
+                    const angle = index * 0.55;
+                    const topY = 110 + Math.sin(angle) * 45;
+                    const bottomY = 110 - Math.sin(angle) * 45;
+
+                    plottedNodes.push({
+                        type: item.type,
+                        top: item.top,
+                        bottom: item.bottom,
+                        x: currentX,
+                        topY: topY,
+                        bottomY: bottomY
+                    });
+
+                    if (topPathD === "") {
+                        topPathD = `M ${currentX} ${topY}`;
+                        bottomPathD = `M ${currentX} ${bottomY}`;
+                    } else {
+                        topPathD += ` L ${currentX} ${topY}`;
+                        bottomPathD += ` L ${currentX} ${bottomY}`;
+                    }
+
+                    if (item.type === 'green') {
+                        if (currentX < targetMinX) targetMinX = currentX;
+                        if (currentX > targetMaxX) targetMaxX = currentX;
+                    }
+
+                    currentX += spacing;
+                }
+            });
+
+            // 雙螺旋貫穿線 (Helix Backbone Lines)
+            const topStrand = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            topStrand.setAttribute('d', topPathD);
+            topStrand.setAttribute('fill', 'none');
+            topStrand.setAttribute('stroke', '#38BDF8');
+            topStrand.setAttribute('stroke-width', '4');
+            topStrand.setAttribute('stroke-dasharray', '2 2');
+
+            const bottomStrand = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            bottomStrand.setAttribute('d', bottomPathD);
+            bottomStrand.setAttribute('fill', 'none');
+            bottomStrand.setAttribute('stroke', '#0284C7');
+            bottomStrand.setAttribute('stroke-width', '4');
+            bottomStrand.setAttribute('stroke-dasharray', '2 2');
+
+            gDNA.appendChild(topStrand);
+            gDNA.appendChild(bottomStrand);
+
+            // 可點擊目標群組
+            let targetGroup = null;
+            if (!targetCut) {
+                targetGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                targetGroup.setAttribute('class', 'dna-target-group cursor-pointer');
+                targetGroup.onclick = triggerCas9Cut;
+            }
+
+            // 繪製鹼基對中間連接桿 (Vertical Rung) 與 圓點 (Nodes)
+            plottedNodes.forEach((node) => {
+                if (node.type === 'gap') {
+                    // 剪切斷裂缺口 Gap UI
+                    const gapG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', node.x - 80);
+                    rect.setAttribute('y', 45);
+                    rect.setAttribute('width', 160);
+                    rect.setAttribute('height', 130);
+                    rect.setAttribute('rx', '18');
+                    rect.setAttribute('fill', '#881337');
+                    rect.setAttribute('fill-opacity', '0.35');
+                    rect.setAttribute('stroke', '#F43F5E');
+                    rect.setAttribute('stroke-width', '2.5');
+                    rect.setAttribute('stroke-dasharray', '6 4');
+
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', node.x);
+                    text.setAttribute('y', 105);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-family', 'Fredoka');
+                    text.setAttribute('font-size', '14');
+                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('fill', '#FDA4AF');
+                    text.textContent = t.cutSiteText;
+
+                    const subtext = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    subtext.setAttribute('x', node.x);
+                    subtext.setAttribute('y', 128);
+                    subtext.setAttribute('text-anchor', 'middle');
+                    subtext.setAttribute('font-family', 'Nunito');
+                    subtext.setAttribute('font-size', '11');
+                    subtext.setAttribute('fill', '#FECDD3');
+                    subtext.textContent = t.cutSiteSub;
+
+                    gapG.appendChild(rect);
+                    gapG.appendChild(text);
+                    gapG.appendChild(subtext);
+                    gDNA.appendChild(gapG);
+                    return;
+                }
+
+                // 鹼基對連接虛線/實線
+                const rung = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                rung.setAttribute('x1', node.x);
+                rung.setAttribute('y1', node.topY);
+                rung.setAttribute('x2', node.x);
+                rung.setAttribute('y2', node.bottomY);
+                
+                let rungColor = '#38BDF8';
+                if (node.type === 'green') rungColor = '#4ADE80';
+                if (node.type === 'red') rungColor = '#FB7185';
+
+                rung.setAttribute('stroke', rungColor);
+                rung.setAttribute('stroke-width', '3');
+
+                const topCircleNode = createNode(node.x, node.topY, node.top, node.type);
+                const bottomCircleNode = createNode(node.x, node.bottomY, node.bottom, node.type);
+
+                if (node.type === 'green' && targetGroup) {
+                    targetGroup.appendChild(rung);
+                    targetGroup.appendChild(topCircleNode);
+                    targetGroup.appendChild(bottomCircleNode);
+                } else {
+                    gDNA.appendChild(rung);
+                    gDNA.appendChild(topCircleNode);
+                    gDNA.appendChild(bottomCircleNode);
+                }
+            });
+
+            // 為綠色目標區域加上鮮豔虛線框 (Dotted Green Frame) 與膠囊按鈕 (Pill Button)
+            if (!targetCut && targetGroup) {
+                const frameBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                frameBox.setAttribute('class', 'target-highlight');
+                frameBox.setAttribute('x', targetMinX - 26);
+                frameBox.setAttribute('y', 36);
+                frameBox.setAttribute('width', (targetMaxX - targetMinX) + 52);
+                frameBox.setAttribute('height', 150);
+                frameBox.setAttribute('rx', '18');
+                frameBox.setAttribute('fill', '#10B981');
+                frameBox.setAttribute('fill-opacity', '0.12');
+                frameBox.setAttribute('stroke', '#22C55E');
+                frameBox.setAttribute('stroke-width', '2.5');
+                frameBox.setAttribute('stroke-dasharray', '6 4');
+
+                // 綠色膠囊頂部按鈕 Pill Button
+                const pillX = (targetMinX + targetMaxX) / 2;
+                const pillBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                pillBg.setAttribute('x', pillX - 85);
+                pillBg.setAttribute('y', 14);
+                pillBg.setAttribute('width', '170');
+                pillBg.setAttribute('height', '28');
+                pillBg.setAttribute('rx', '14');
+                pillBg.setAttribute('fill', '#22C55E');
+
+                const pillText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                pillText.setAttribute('x', pillX);
+                pillText.setAttribute('y', 32);
+                pillText.setAttribute('text-anchor', 'middle');
+                pillText.setAttribute('font-family', 'Fredoka');
+                pillText.setAttribute('font-size', '12');
+                pillText.setAttribute('font-weight', 'bold');
+                pillText.setAttribute('fill', '#052E16');
+                pillText.textContent = t.targetClickText;
+
+                targetGroup.insertBefore(frameBox, targetGroup.firstChild);
+                targetGroup.appendChild(pillBg);
+                targetGroup.appendChild(pillText);
+
+                gDNA.appendChild(targetGroup);
+            }
+
+            svg.appendChild(gDNA);
+        }
+
+        // ================= 8. 剪切與 DNA 機能片段選擇 (Actions) =================
+        function triggerCas9Cut() {
+            if (targetCut || gameStep !== 1) return;
+
+            targetCut = true;
+            updateStepIndicator(2);
+            renderHelixBench();
+            showDesiredInventory();
+        }
+
+        function showDesiredInventory() {
+            const inv = document.getElementById('desired-inventory');
+            const optionsBox = document.getElementById('insert-options');
+            if (inv) inv.classList.remove('hidden');
+            if (!optionsBox) return;
+            optionsBox.innerHTML = "";
+
+            const mission = MISSIONS[currentLevelIdx];
+
+            mission.fragments.forEach((frag) => {
+                const btn = document.createElement('button');
+                btn.className = "bg-white hover:bg-rose-50/80 border-2 border-slate-200 hover:border-rose-400 p-4 rounded-2xl shadow-sm transition text-left flex flex-col justify-between space-y-2 group";
+                btn.onclick = () => insertDesiredDNA(frag);
+
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-2xl">${frag.icon}</span>
+                        <span class="text-[10px] font-extrabold uppercase bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full group-hover:bg-rose-600 group-hover:text-white transition">${frag.shapeIcon || "3D Shape"}</span>
+                    </div>
+                    <div>
+                        <h5 class="font-heading font-bold text-slate-800 text-sm group-hover:text-rose-700">${frag.title[currentLang]}</h5>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">${frag.desc[currentLang]}</p>
+                    </div>
+                `;
+
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function insertDesiredDNA(fragment) {
+            const t = TRANSLATIONS[currentLang];
+
+            if (!fragment.isCorrect) {
+                alert(t.wrongChoiceAlert);
+                return;
+            }
+
+            geneInserted = true;
+            renderHelixBench();
+
+            const inv = document.getElementById('desired-inventory');
+            if (inv) inv.classList.add('hidden');
+            updateStepIndicator(3);
+
+            setTimeout(() => {
+                showProteinResult();
+            }, 800);
+        }
+
+        function showProteinResult() {
+            const res = document.getElementById('protein-result');
+            const mission = MISSIONS[currentLevelIdx];
+
+            if (res) res.classList.remove('hidden');
+
+            setElementText('result-icon-anim', mission.resultIcon);
+            setElementText('result-protein-name', mission.resultName[currentLang]);
+            setElementText('result-protein-desc', mission.resultDesc[currentLang]);
+
+            // 隱藏或顯示下一關按鈕
+            const nextBtn = document.getElementById('next-level-btn');
+            if (nextBtn) {
+                if (currentLevelIdx >= MISSIONS.length - 1) {
+                    nextBtn.classList.add('hidden');
+                } else {
+                    nextBtn.classList.remove('hidden');
+                }
+            }
+
+            if (res) res.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function goToNextLevel() {
+            if (currentLevelIdx < MISSIONS.length - 1) {
+                currentLevelIdx++;
+                renderLevelButtons();
+                loadCurrentMission();
+            }
+        }
+
+        function resetLabGame() {
+            loadCurrentMission();
+        }
+
+        // 頁面初次載入初始化
+        window.onload = function() {
+            applyLanguage();
+        };
+    </script>
+</body>
+</html>
